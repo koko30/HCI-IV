@@ -1,0 +1,55 @@
+event_name,stakeholder,text_summary,sentiment,keywords,date
+Climate Summit 2024,Government,Government narrative 1 about Climate Summit 2024.,-0.05,government-climate-view1,2024-12-05
+Climate Summit 2024,Government,Government narrative 2 about Climate Summit 2024.,0.05,government-climate-view2,2024-12-05
+Climate Summit 2024,Government,Government narrative 3 about Climate Summit 2024.,0.15,government-climate-view3,2024-12-05
+Climate Summit 2024,Government,Government narrative 4 about Climate Summit 2024.,0.25,government-climate-view4,2024-12-05
+Climate Summit 2024,Government,Government narrative 5 about Climate Summit 2024.,0.35,government-climate-view5,2024-12-05
+Climate Summit 2024,Government,Government narrative 6 about Climate Summit 2024.,0.45,government-climate-view6,2024-12-05
+Climate Summit 2024,Media,Media narrative 1 about Climate Summit 2024.,-0.35,media-climate-view1,2024-12-05
+Climate Summit 2024,Media,Media narrative 2 about Climate Summit 2024.,-0.25,media-climate-view2,2024-12-05
+Climate Summit 2024,Media,Media narrative 3 about Climate Summit 2024.,-0.15,media-climate-view3,2024-12-05
+Climate Summit 2024,Media,Media narrative 4 about Climate Summit 2024.,-0.05,media-climate-view4,2024-12-05
+Climate Summit 2024,Media,Media narrative 5 about Climate Summit 2024.,0.05,media-climate-view5,2024-12-05
+Climate Summit 2024,Media,Media narrative 6 about Climate Summit 2024.,0.15,media-climate-view6,2024-12-05
+Climate Summit 2024,Public,Public narrative 1 about Climate Summit 2024.,-0.25,public-climate-view1,2024-12-05
+Climate Summit 2024,Public,Public narrative 2 about Climate Summit 2024.,-0.15,public-climate-view2,2024-12-05
+Climate Summit 2024,Public,Public narrative 3 about Climate Summit 2024.,-0.05,public-climate-view3,2024-12-05
+Climate Summit 2024,Public,Public narrative 4 about Climate Summit 2024.,0.05,public-climate-view4,2024-12-05
+Climate Summit 2024,Public,Public narrative 5 about Climate Summit 2024.,0.15,public-climate-view5,2024-12-05
+Climate Summit 2024,Public,Public narrative 6 about Climate Summit 2024.,0.25,public-climate-view6,2024-12-05
+AI Regulation Act,Government,Government narrative 1 about AI Regulation Act.,-0.05,government-ai-view1,2024-09-10
+AI Regulation Act,Government,Government narrative 2 about AI Regulation Act.,0.05,government-ai-view2,2024-09-10
+AI Regulation Act,Government,Government narrative 3 about AI Regulation Act.,0.15,government-ai-view3,2024-09-10
+AI Regulation Act,Government,Government narrative 4 about AI Regulation Act.,0.25,government-ai-view4,2024-09-10
+AI Regulation Act,Government,Government narrative 5 about AI Regulation Act.,0.35,government-ai-view5,2024-09-10
+AI Regulation Act,Government,Government narrative 6 about AI Regulation Act.,0.45,government-ai-view6,2024-09-10
+AI Regulation Act,Media,Media narrative 1 about AI Regulation Act.,-0.35,media-ai-view1,2024-09-10
+AI Regulation Act,Media,Media narrative 2 about AI Regulation Act.,-0.25,media-ai-view2,2024-09-10
+AI Regulation Act,Media,Media narrative 3 about AI Regulation Act.,-0.15,media-ai-view3,2024-09-10
+AI Regulation Act,Media,Media narrative 4 about AI Regulation Act.,-0.05,media-ai-view4,2024-09-10
+AI Regulation Act,Media,Media narrative 5 about AI Regulation Act.,0.05,media-ai-view5,2024-09-10
+AI Regulation Act,Media,Media narrative 6 about AI Regulation Act.,0.15,media-ai-view6,2024-09-10
+AI Regulation Act,Public,Public narrative 1 about AI Regulation Act.,-0.25,public-ai-view1,2024-09-10
+AI Regulation Act,Public,Public narrative 2 about AI Regulation Act.,-0.15,public-ai-view2,2024-09-10
+AI Regulation Act,Public,Public narrative 3 about AI Regulation Act.,-0.05,public-ai-view3,2024-09-10
+AI Regulation Act,Public,Public narrative 4 about AI Regulation Act.,0.05,public-ai-view4,2024-09-10
+AI Regulation Act,Public,Public narrative 5 about AI Regulation Act.,0.15,public-ai-view5,2024-09-10
+AI Regulation Act,Public,Public narrative 6 about AI Regulation Act.,0.25,public-ai-view6,2024-09-10
+World Cup Final 2022,Government,Government narrative 1 about World Cup Final 2022.,-0.05,government-world-view1,2022-12-18
+World Cup Final 2022,Government,Government narrative 2 about World Cup Final 2022.,0.05,government-world-view2,2022-12-18
+World Cup Final 2022,Government,Government narrative 3 about World Cup Final 2022.,0.15,government-world-view3,2022-12-18
+World Cup Final 2022,Government,Government narrative 4 about World Cup Final 2022.,0.25,government-world-view4,2022-12-18
+World Cup Final 2022,Government,Government narrative 5 about World Cup Final 2022.,0.35,government-world-view5,2022-12-18
+World Cup Final 2022,Government,Government narrative 6 about World Cup Final 2022.,0.45,government-world-view6,2022-12-18
+World Cup Final 2022,Media,Media narrative 1 about World Cup Final 2022.,-0.35,media-world-view1,2022-12-18
+World Cup Final 2022,Media,Media narrative 2 about World Cup Final 2022.,-0.25,media-world-view2,2022-12-18
+World Cup Final 2022,Media,Media narrative 3 about World Cup Final 2022.,-0.15,media-world-view3,2022-12-18
+World Cup Final 2022,Media,Media narrative 4 about World Cup Final 2022.,-0.05,media-world-view4,2022-12-18
+World Cup Final 2022,Media,Media narrative 5 about World Cup Final 2022.,0.05,media-world-view5,2022-12-18
+World Cup Final 2022,Media,Media narrative 6 about World Cup Final 2022.,0.15,media-world-view6,2022-12-18
+World Cup Final 2022,Public,Public narrative 1 about World Cup Final 2022.,-0.25,public-world-view1,2022-12-18
+World Cup Final 2022,Public,Public narrative 2 about World Cup Final 2022.,-0.15,public-world-view2,2022-12-18
+World Cup Final 2022,Public,Public narrative 3 about World Cup Final 2022.,-0.05,public-world-view3,2022-12-18
+World Cup Final 2022,Public,Public narrative 4 about World Cup Final 2022.,0.05,public-world-view4,2022-12-18
+World Cup Final 2022,Public,Public narrative 5 about World Cup Final 2022.,0.15,public-world-view5,2022-12-18
+World Cup Final 2022,Public,Public narrative 6 about World Cup Final 2022.,0.25,public-world-view6,2022-12-18
