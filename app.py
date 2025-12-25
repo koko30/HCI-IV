@@ -66,6 +66,19 @@ NEG_WORDS = {
 "mismanaged","poorly","weakly","unstable","uncertain","uncertainty","doubt","doubtful","skeptical",
 "skepticism","threatened","collapse","harmfully","destructive","destruction","chaos","instability",
 "opposition","protest","outrage","criticize","criticism","criticized","blame","accusation","accused"
+"bad","poor","negative","failure","fail","failed","failing","risk","risky","danger","dangerous",
+"threat","threaten","threatening","crisis","conflict","controversy","controversial","harm","harmful",
+"damage","damaging","loss","decline","declining","collapse","collapsed","weak","weakness","unstable",
+"instability","unsafe","insecure","fear","fearful","panic","anxiety","angry","anger","frustrated",
+"frustration","disappointed","disappointment","problem","problems","issue","issues","chaos","chaotic",
+"scandal","corruption","corrupt","bias","biased","unfair","injustice","inequality","discrimination",
+"violence","violent","abuse","abusive","attack","attacked","attacking","hate","hatred","hostile",
+"hostility","toxic","misleading","false","falsehood","lie","lying","deception","deceptive","fraud",
+"fraudulent","error","errors","mistake","mistakes","delay","delayed","delay","breakdown","collapse",
+"crash","crisis","deficit","shortage","failure","ineffective","inefficient","mismanagement",
+"mismanaged","poorly","weakly","unstable","uncertain","uncertainty","doubt","doubtful","skeptical",
+"skepticism","threatened","collapse","harmfully","destructive","destruction","chaos","instability",
+"opposition","protest","outrage","criticize","criticism","criticized","blame","accusation","accused"
 }
 
 
