@@ -32,18 +32,42 @@ NEG_THRESHOLD = -0.08
 # Sentiment Lexicon (Starter)
 # =====================================================
 POS_WORDS = {
-    "progress", "success", "agreement", "cooperation", "growth",
-    "innovation", "support", "stability", "unity", "hope",
-    "benefit", "achievement", "positive", "safe", "responsible",
-    "improve", "improved", "improving", "solution", "solutions"
+"good","great","excellent","positive","success","successful","progress","growth","improve","improved",
+"improving","improvement","benefit","beneficial","advantage","advantageous","achievement","achieve",
+"achieved","innovation","innovative","support","supportive","stability","stable","unity","hope",
+"hopeful","optimistic","confidence","confident","trust","trusted","reliable","reliability","secure",
+"security","safe","safety","peace","peaceful","cooperation","collaboration","agreement","consensus",
+"fair","fairness","balanced","responsible","responsibility","ethical","transparent","clarity",
+"efficient","efficiency","effective","effectiveness","productive","productivity","strong","strength",
+"resilient","resilience","sustainable","sustainability","inclusive","inclusion","empower","empowered",
+"empowering","successfully","prosper","prosperity","advance","advancing","advancement","achievement",
+"reward","rewarding","encouraging","encouraged","encourage","positive","constructive","helpful",
+"useful","valuable","value","worth","worthy","commendable","commend","celebrate","celebration",
+"proud","pride","respect","respectful","coherent","consistent","credible","legitimate","valid",
+"verified","accurate","accuracy","optimism","calm","confidence","clarified","impressive","robust",
+"progressive","dynamic","adaptive","responsive","friendly","cooperative","supporting","guiding",
+"motivating","motivated","motivational","uplifting","reassuring","securely","stabilize","stabilized",
+"strengthen","strengthened","strengthening","upgrade","upgraded","upgrading","win","winning",
+"victory","achiever","highquality","best","better","improved","improvement","progression"
 }
 
+
 NEG_WORDS = {
-    "crisis", "failure", "conflict", "risk", "fear",
-    "harm", "controversy", "discrimination", "violence",
-    "loss", "problem", "negative", "collapse", "threat",
-    "chaos", "scandal", "attack", "hate"
+"bad","poor","negative","failure","fail","failed","failing","risk","risky","danger","dangerous",
+"threat","threaten","threatening","crisis","conflict","controversy","controversial","harm","harmful",
+"damage","damaging","loss","decline","declining","collapse","collapsed","weak","weakness","unstable",
+"instability","unsafe","insecure","fear","fearful","panic","anxiety","angry","anger","frustrated",
+"frustration","disappointed","disappointment","problem","problems","issue","issues","chaos","chaotic",
+"scandal","corruption","corrupt","bias","biased","unfair","injustice","inequality","discrimination",
+"violence","violent","abuse","abusive","attack","attacked","attacking","hate","hatred","hostile",
+"hostility","toxic","misleading","false","falsehood","lie","lying","deception","deceptive","fraud",
+"fraudulent","error","errors","mistake","mistakes","delay","delayed","delay","breakdown","collapse",
+"crash","crisis","deficit","shortage","failure","ineffective","inefficient","mismanagement",
+"mismanaged","poorly","weakly","unstable","uncertain","uncertainty","doubt","doubtful","skeptical",
+"skepticism","threatened","collapse","harmfully","destructive","destruction","chaos","instability",
+"opposition","protest","outrage","criticize","criticism","criticized","blame","accusation","accused"
 }
+
 
 STOPWORDS = {
     "the","and","a","to","of","in","on","for","with","as","at","by",
