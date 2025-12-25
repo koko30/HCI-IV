@@ -8,13 +8,16 @@ import streamlit as st
 
 
 # =====================================================
-# PAGE SETUP
+# Page Setup
 # =====================================================
-st.set_page_config(page_title="Shifting Narratives", page_icon="🌍", layout="centered")
-
+st.set_page_config(
+    page_title="Shifting Narratives",
+    page_icon="🌍",
+    layout="centered"
+)
 
 # =====================================================
-# CONFIGURATION
+# Configuration
 # =====================================================
 DATA_PATH = Path("data/events.csv")
 
@@ -25,52 +28,47 @@ TOP_N_KEYWORDS = 30
 POS_THRESHOLD = 0.08
 NEG_THRESHOLD = -0.08
 
-NEGATION_WINDOW = 3
-NEGATION_WORDS = {
-    "not", "no", "never", "without", "hardly", "rarely", "none",
-    "cannot", "can't", "dont", "don't", "doesnt", "doesn't"
-}
-
-
 # =====================================================
-# SENTIMENT LEXICON (STARTER)
+# Sentiment Lexicon (Starter)
 # =====================================================
 POS_WORDS = {
-    "progress", "success", "agreement", "cooperation", "growth", "innovation", "support",
-    "stability", "unity", "hope", "benefit", "achievement", "positive", "safe",
-    "responsible", "improve", "improved", "improving", "solution", "solutions", "peace"
+    "progress", "success", "agreement", "cooperation", "growth",
+    "innovation", "support", "stability", "unity", "hope",
+    "benefit", "achievement", "positive", "safe", "responsible",
+    "improve", "improved", "improving", "solution", "solutions"
 }
 
 NEG_WORDS = {
-    "crisis", "failure", "conflict", "risk", "fear", "harm", "controversy", "discrimination",
-    "violence", "loss", "problem", "negative", "collapse", "threat", "chaos", "scandal",
-    "attack", "hate", "danger"
+    "crisis", "failure", "conflict", "risk", "fear",
+    "harm", "controversy", "discrimination", "violence",
+    "loss", "problem", "negative", "collapse", "threat",
+    "chaos", "scandal", "attack", "hate"
 }
 
 STOPWORDS = {
-    "the","and","a","to","of","in","on","for","with","as","at","by","is","are","was","were",
-    "be","been","being","it","this","that","from","or","but","we","they","you","i","he","she",
-    "them","his","her","their","our","us","your","my","me","will","would","can","could","should",
-    "may","might","about","into","over","after","before","more","most","some","any","so","such",
-    "also","very","just","up","down","out","now","new","one","two","many","all"
+    "the","and","a","to","of","in","on","for","with","as","at","by",
+    "is","are","was","were","be","been","being","it","this","that",
+    "from","or","but","not","we","they","you","i","he","she","them",
+    "his","her","their","our","us","your","my","me","will","would",
+    "can","could","should","may","might","about","into","over","after",
+    "before","more","most","some","any","no","yes","if","then","than",
+    "so","such","also","very","just","up","down","out","now","new",
+    "one","two","many","all"
 }
 
-
 # =====================================================
-# TEXT PROCESSING
+# Text Processing Helpers
 # =====================================================
 def tokenize(text: str) -> list[str]:
     text = str(text).lower()
     text = re.sub(r"http\S+", " ", text)
-    text = re.sub(r"[^a-z\s']", " ", text)  # keep apostrophes
-    tokens = [t.strip("'") for t in text.split() if t.strip("'")]
-    return tokens
+    text = re.sub(r"[^a-z\s]", " ", text)
+    return [t for t in text.split() if len(t) > 2 and t not in STOPWORDS]
 
-
-def cleaned_tokens(text: str) -> list[str]:
+def extract_keywords(text: str, n: int = TOP_N_KEYWORDS) -> pd.DataFrame:
     tokens = tokenize(text)
-    return [t for t in tokens if len(t) > 2 and t not in STOPWORDS]
-
+    freq = Counter(tokens).most_common(n)
+    return pd.DataFrame(freq, columns=["keyword", "freq"])
 
 def polarity(word: str) -> str:
     if word in POS_WORDS:
@@ -79,57 +77,16 @@ def polarity(word: str) -> str:
         return "Negative"
     return "Neutral"
 
+def sentiment_from_keywords(df_kw: pd.DataFrame) -> dict:
+    if df_kw.empty:
+        return {"score": 0.0, "label": "Neutral", "pos": 0, "neg": 0, "neu": 0, "coverage": 0.0}
 
-def extract_keywords(text: str, n: int = TOP_N_KEYWORDS) -> pd.DataFrame:
-    tokens = cleaned_tokens(text)
-    freq = Counter(tokens).most_common(n)
-    return pd.DataFrame(freq, columns=["keyword", "freq"])
+    df = df_kw.copy()
+    df["polarity"] = df["keyword"].apply(polarity)
 
-
-def apply_negation_flip(token_list: list[str]) -> list[str]:
-    """
-    Return a polarity per token using a negation window:
-    If a negation appears within the previous NEGATION_WINDOW tokens,
-    flip Positive <-> Negative for sentiment words.
-    """
-    out = []
-    for i, w in enumerate(token_list):
-        base = polarity(w)
-
-        negated = any(
-            token_list[j] in NEGATION_WORDS
-            for j in range(max(0, i - NEGATION_WINDOW), i)
-        )
-
-        if negated and base in {"Positive", "Negative"}:
-            out.append("Negative" if base == "Positive" else "Positive")
-        else:
-            out.append(base)
-
-    return out
-
-
-def sentiment_stats_from_text(text: str) -> dict:
-    """
-    Keyword-frequency based sentiment:
-    - Extract top keywords with counts
-    - Expand into a frequency token stream
-    - Apply negation flip
-    - Count Positive/Negative/Neutral and compute score
-    """
-    kw_df = extract_keywords(text, TOP_N_KEYWORDS)
-
-    if kw_df.empty:
-        return {"score": 0.0, "label": "Neutral", "pos": 0, "neg": 0, "neu": 0, "coverage": 0.0, "kw_df": kw_df}
-
-    expanded = []
-    for _, r in kw_df.iterrows():
-        expanded.extend([r["keyword"]] * int(r["freq"]))
-
-    pols = apply_negation_flip(expanded)
-    pos = int(sum(p == "Positive" for p in pols))
-    neg = int(sum(p == "Negative" for p in pols))
-    neu = int(sum(p == "Neutral" for p in pols))
+    pos = int(df[df["polarity"] == "Positive"]["freq"].sum())
+    neg = int(df[df["polarity"] == "Negative"]["freq"].sum())
+    neu = int(df[df["polarity"] == "Neutral"]["freq"].sum())
 
     total = pos + neg + neu
     score = 0.0 if total == 0 else (pos - neg) / total
@@ -143,95 +100,74 @@ def sentiment_stats_from_text(text: str) -> dict:
 
     coverage = 0.0 if total == 0 else (pos + neg) / total
 
-    kw_df["base_polarity"] = kw_df["keyword"].apply(polarity)
-
-    return {"score": float(score), "label": label, "pos": pos, "neg": neg, "neu": neu, "coverage": float(coverage), "kw_df": kw_df}
-
+    return {"score": float(score), "label": label, "pos": pos, "neg": neg, "neu": neu, "coverage": float(coverage)}
 
 # =====================================================
-# VISUAL SETTINGS
+# Altair Color Scale
 # =====================================================
 COLOR_SCALE = alt.Scale(
     domain=["Positive", "Neutral", "Negative"],
     range=["#2ca02c", "#7f7f7f", "#d62728"]
 )
 
-
 # =====================================================
-# CSV TEMPLATE DOWNLOAD
-# =====================================================
-def template_csv_bytes() -> bytes:
-    template = pd.DataFrame(
-        {
-            "event_name": ["Example Event"],
-            "stakeholder": ["Government"],
-            "entity": ["Ministry of Environment"],
-            "source": ["https://example.com/article"],
-            "collection_method": ["Official statement"],
-            "date": ["2025-01-01"],
-            "text": ["Paste your article text here..."],
-        }
-    )
-    return template.to_csv(index=False).encode("utf-8")
-
-
-# =====================================================
-# LOAD INITIAL DATA
+# Load Initial Data
 # =====================================================
 def load_data() -> pd.DataFrame:
     if DATA_PATH.exists():
         return pd.read_csv(DATA_PATH)
+    # Fallback empty dataset with columns
     return pd.DataFrame(columns=REQUIRED_COLUMNS + OPTIONAL_COLUMNS)
-
 
 if "dataset" not in st.session_state:
     st.session_state.dataset = load_data()
 
 df = st.session_state.dataset.copy()
 
-
 # =====================================================
-# SIDEBAR: DATA INPUT
+# Sidebar: Data Input
 # =====================================================
 st.sidebar.title("Data Input")
 
-input_mode = st.sidebar.radio("Input method", ["Upload CSV", "Paste Article"], index=0)
-
-st.sidebar.download_button(
-    label="Download CSV Template",
-    data=template_csv_bytes(),
-    file_name="events_template.csv",
-    mime="text/csv"
+input_mode = st.sidebar.radio(
+    "Input method",
+    ["Upload CSV", "Paste Article"]
 )
 
+# ---------- Upload CSV Instructions Button ----------
 if input_mode == "Upload CSV":
     st.sidebar.subheader("Upload Dataset (CSV)")
 
     with st.sidebar.expander("📘 CSV Instructions"):
         st.markdown(
             """
-**Each row = one document/article**
+**What should this CSV contain?**
 
-**Required columns**
-- `event_name`
-- `stakeholder`
-- `text`
-- `date` (YYYY-MM-DD)
+Each row should represent **one article or document**.
 
-**Optional columns**
-- `entity`
-- `source`
-- `collection_method`
+### Required columns
+- **event_name**: Name of the event (used for grouping)
+- **stakeholder**: Perspective (Government / Media / Public, etc.)
+- **text**: Full article text or cleaned summary
+- **date**: Publication date in format **YYYY-MM-DD**
+
+### Optional columns
+- **entity**: Specific source (BBC, Ministry, Twitter, etc.)
+- **source**: URL or platform name
+- **collection_method**: How the text was collected (news, statement, social post)
+
+If your CSV follows this structure, the app will work automatically.
 """
         )
 
     uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=["csv"])
+
     if uploaded_file is not None:
         try:
             df_new = pd.read_csv(uploaded_file)
 
             if df_new.empty:
-                st.sidebar.error("Upload failed: The CSV has no rows.")
+                st.sidebar.error("Upload failed: The CSV file contains no rows.")
             else:
                 missing = [c for c in REQUIRED_COLUMNS if c not in df_new.columns]
                 if missing:
@@ -239,17 +175,20 @@ if input_mode == "Upload CSV":
                 else:
                     df_new["date"] = pd.to_datetime(df_new["date"], errors="coerce")
                     if df_new["date"].isna().any():
-                        st.sidebar.error("Date format error: Use YYYY-MM-DD in the date column.")
+                        st.sidebar.error("Date format error: Please use YYYY-MM-DD in the date column.")
                     else:
+                        # Ensure optional columns exist
                         for c in OPTIONAL_COLUMNS:
                             if c not in df_new.columns:
                                 df_new[c] = ""
                         st.session_state.dataset = df_new.copy()
                         df = st.session_state.dataset.copy()
-                        st.sidebar.success("CSV loaded successfully.")
-        except Exception:
-            st.sidebar.error("Upload failed: Could not read CSV. Check commas/quotes.")
+                        st.sidebar.success("CSV loaded successfully. Dataset is ready.")
 
+        except Exception:
+            st.sidebar.error("Upload failed: Could not read the CSV file. Please check formatting.")
+
+# ---------- Paste Article Mode ----------
 else:
     st.sidebar.subheader("Add Article")
     event_name = st.sidebar.text_input("Event name", value="New Event")
@@ -280,9 +219,8 @@ else:
             df = st.session_state.dataset.copy()
             st.sidebar.success("Article added.")
 
-
 # =====================================================
-# SIDEBAR: VIEW CONTROLS
+# Sidebar: View Controls (Moved here)
 # =====================================================
 st.sidebar.title("View Controls")
 
@@ -290,9 +228,11 @@ if df.empty:
     st.warning("No data available yet. Upload a CSV or paste an article.")
     st.stop()
 
+# Ensure required columns exist
 for c in REQUIRED_COLUMNS:
     if c not in df.columns:
         df[c] = ""
+
 for c in OPTIONAL_COLUMNS:
     if c not in df.columns:
         df[c] = ""
@@ -301,20 +241,24 @@ df["date"] = pd.to_datetime(df["date"], errors="coerce")
 df = df.dropna(subset=["date"]).copy()
 df["text"] = df["text"].astype(str)
 
-event_list = sorted([e for e in df["event_name"].dropna().unique() if str(e).strip()])
-stake_list = sorted([s for s in df["stakeholder"].dropna().unique() if str(s).strip()])
-
-if not event_list or not stake_list:
-    st.warning("Dataset does not contain valid event_name/stakeholder values.")
+# Event selection
+event_list = sorted([e for e in df["event_name"].dropna().unique() if str(e).strip() != ""])
+if not event_list:
+    st.warning("No valid events found in dataset.")
     st.stop()
 
 selected_event = st.sidebar.selectbox("Select Event", event_list)
+
+# Stakeholder selection
+stake_list = sorted([s for s in df["stakeholder"].dropna().unique() if str(s).strip() != ""])
 selected_stakeholder = st.sidebar.selectbox("Select Stakeholder", stake_list)
 
+# Filter
 event_df = df[df["event_name"] == selected_event].copy()
 stake_df = event_df[event_df["stakeholder"] == selected_stakeholder].copy()
 
-entities = ["All"] + sorted([e for e in stake_df["entity"].dropna().unique() if str(e).strip()])
+# Entity selection
+entities = ["All"] + sorted([e for e in stake_df["entity"].dropna().unique() if str(e).strip() != ""])
 selected_entity = st.sidebar.selectbox("Select Entity", entities)
 
 if selected_entity != "All":
@@ -324,12 +268,14 @@ if stake_df.empty:
     st.warning("No documents found for the selected filters.")
     st.stop()
 
+# Document selection (example)
 stake_df = stake_df.sort_values("date")
 doc_indices = stake_df.index.tolist()
 doc_label_map = {
-    idx: f"{stake_df.loc[idx,'date'].date()} — {str(stake_df.loc[idx,'entity']).strip() or 'No entity'}"
+    idx: f"{stake_df.loc[idx,'date'].date()} — {str(stake_df.loc[idx,'entity'])[:35] if str(stake_df.loc[idx,'entity']).strip() else 'No entity'}"
     for idx in doc_indices
 }
+
 selected_doc_idx = st.sidebar.selectbox(
     "Select Document Example",
     options=doc_indices,
@@ -338,39 +284,43 @@ selected_doc_idx = st.sidebar.selectbox(
 
 row = stake_df.loc[selected_doc_idx]
 
-
 # =====================================================
-# MAIN DASHBOARD
+# Main Dashboard
 # =====================================================
 st.title("Shifting Narratives")
-st.caption("Keyword-frequency sentiment with negation handling (e.g., 'not good').")
+st.caption("Explainable sentiment scoring using keyword frequency and a sentiment dictionary.")
 
-with st.expander("What does 'frequency' mean here?"):
-    st.markdown(
-        """
-**Frequency** means how many times a word appears in the text after cleaning.  
-Example: if **crisis** appears 7 times, its frequency is **7**.
-
-We extract the most frequent words, then count how many of those frequent words are:
-🟢 Positive, ⚪ Neutral, 🔴 Negative (including negation flipping).
-"""
-    )
-
+# Dataset summary
 st.markdown("### Dataset Summary")
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Events", len(df["event_name"].unique()))
-c2.metric("Documents", len(df))
-c3.metric("Stakeholders", len(df["stakeholder"].unique()))
-c4.metric("Date range", f"{df['date'].min().date()} → {df['date'].max().date()}")
+colA, colB, colC, colD = st.columns(4)
+colA.metric("Events", len(df["event_name"].unique()))
+colB.metric("Documents", len(df))
+colC.metric("Stakeholders", len(df["stakeholder"].unique()))
+colD.metric("Date range", f"{df['date'].min().date()} → {df['date'].max().date()}")
+
+# Show collected sources and methods (if present)
+with st.expander("See data collection details"):
+    st.write("**Sources:**")
+    sources = sorted([s for s in df["source"].dropna().unique() if str(s).strip() != ""])
+    st.write(sources if sources else "No sources provided.")
+
+    st.write("**Collection methods:**")
+    methods = sorted([m for m in df["collection_method"].dropna().unique() if str(m).strip() != ""])
+    st.write(methods if methods else "No collection methods provided.")
 
 st.markdown("---")
+
+# Selected view header
 st.subheader(f"{selected_stakeholder} Perspective — {selected_event}")
 
-doc_stats = sentiment_stats_from_text(row["text"])
-doc_kw = doc_stats["kw_df"].copy()
+# Compute sentiment + keywords for selected doc
+kw_df = extract_keywords(row["text"], TOP_N_KEYWORDS)
+kw_df["polarity"] = kw_df["keyword"].apply(polarity)
+stats = sentiment_from_keywords(kw_df)
 
-sent_color = "#2ca02c" if doc_stats["label"] == "Positive" else "#d62728" if doc_stats["label"] == "Negative" else "#7f7f7f"
+sent_color = "#2ca02c" if stats["label"] == "Positive" else "#d62728" if stats["label"] == "Negative" else "#7f7f7f"
 
+# Show document text excerpt
 st.markdown(
     f"""
 <div style='padding:18px;border-radius:10px;background:#f5f5f5;font-size:18px;line-height:1.6;'>
@@ -381,30 +331,32 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Sentiment result
 st.markdown(
     f"<div style='font-size:18px;color:{sent_color};margin-top:10px;font-weight:bold;'>"
-    f"Sentiment score: {doc_stats['score']:.2f} ({doc_stats['label']})</div>",
+    f"Sentiment score: {stats['score']:.2f} ({stats['label']})</div>",
     unsafe_allow_html=True
 )
 
+# Legend placed near the results
 st.markdown("**Legend:** 🟢 Positive   |   ⚪ Neutral   |   🔴 Negative")
 
-# =====================================================
-# WHY THIS SCORE?
-# =====================================================
 st.markdown("---")
+
+# =====================================================
+# Explanation: Why this score?
+# =====================================================
 st.markdown("## Why this sentiment score?")
 
 m1, m2, m3, m4 = st.columns(4)
-m1.metric("Positive freq", doc_stats["pos"])
-m2.metric("Negative freq", doc_stats["neg"])
-m3.metric("Neutral freq", doc_stats["neu"])
-m4.metric("Coverage", f"{doc_stats['coverage']*100:.0f}%")
+m1.metric("Positive freq", stats["pos"])
+m2.metric("Negative freq", stats["neg"])
+m3.metric("Neutral freq", stats["neu"])
+m4.metric("Coverage", f"{stats['coverage']*100:.0f}%")
 
-st.caption("Coverage shows how much of the counted frequent words are emotional (positive/negative).")
+st.caption("Coverage shows how much of the top keywords are emotional (positive/negative) instead of neutral.")
 
-top_kw = doc_kw.sort_values("freq", ascending=False).head(15).copy()
-top_kw["polarity"] = top_kw["keyword"].apply(polarity)
+top_kw = kw_df.sort_values("freq", ascending=False).head(15)
 
 keyword_bar = (
     alt.Chart(top_kw)
@@ -415,92 +367,36 @@ keyword_bar = (
         color=alt.Color("polarity:N", scale=COLOR_SCALE),
         tooltip=["keyword", "freq", "polarity"]
     )
-    .properties(height=420, title="Top Keywords by Frequency (Base Polarity)")
+    .properties(height=420, title="Top Keywords by Frequency and Polarity")
 )
+
 st.altair_chart(keyword_bar, use_container_width=True)
 
 st.markdown(
     """
 **Score formula:**  
 `score = (positive_freq - negative_freq) / (positive_freq + negative_freq + neutral_freq)`  
-
-**Negation rule:** if a negation word (not/no/never/without) appears shortly before a sentiment word,
-we flip the polarity (example: “not good” → negative).
 """
 )
 
-# =====================================================
-# EVENT PIE (DONUT) CHART WITH ALTAIR (NO MATPLOTLIB)
-# =====================================================
 st.markdown("---")
-st.markdown("## Selected Event: Effective Words (Percent)")
-
-event_pos = 0
-event_neg = 0
-event_neu = 0
-
-for t in event_df["text"].astype(str).tolist():
-    s = sentiment_stats_from_text(t)
-    event_pos += s["pos"]
-    event_neg += s["neg"]
-    event_neu += s["neu"]
-
-total = event_pos + event_neg + event_neu
-
-if total == 0:
-    st.info("No effective keywords found for this event yet.")
-else:
-    pie_df = pd.DataFrame(
-        {
-            "category": ["Positive", "Neutral", "Negative"],
-            "count": [event_pos, event_neu, event_neg],
-        }
-    )
-    pie_df["percent"] = pie_df["count"] / pie_df["count"].sum()
-
-    donut = (
-        alt.Chart(pie_df)
-        .mark_arc(innerRadius=60)
-        .encode(
-            theta=alt.Theta("count:Q", stack=True),
-            color=alt.Color("category:N", scale=COLOR_SCALE, title=None),
-            tooltip=[
-                "category:N",
-                alt.Tooltip("count:Q", title="Count"),
-                alt.Tooltip("percent:Q", format=".1%", title="Percent"),
-            ],
-        )
-        .properties(height=320)
-    )
-
-    labels = (
-        alt.Chart(pie_df)
-        .mark_text(radius=130, size=14)
-        .encode(
-            theta=alt.Theta("count:Q", stack=True),
-            text=alt.Text("percent:Q", format=".0%"),
-            color=alt.value("black"),
-        )
-    )
-
-    st.altair_chart(donut + labels, use_container_width=True)
-
-    st.caption("Percentages are based on the effective frequent words found (with negation flipping).")
 
 # =====================================================
-# STAKEHOLDER OVERVIEW
+# Stakeholder Overview (Selected Event)
 # =====================================================
-st.markdown("---")
 st.markdown("## Stakeholder Overview (Selected Event)")
 
-def score_for_text(text: str) -> float:
-    return sentiment_stats_from_text(text)["score"]
+def avg_sentiment(texts: pd.Series) -> float:
+    scores = []
+    for t in texts.astype(str).tolist():
+        kw = extract_keywords(t, TOP_N_KEYWORDS)
+        scores.append(sentiment_from_keywords(kw)["score"])
+    return sum(scores) / len(scores) if scores else 0.0
 
 overview = (
-    event_df.assign(score=event_df["text"].astype(str).apply(score_for_text))
-    .groupby("stakeholder", as_index=False)["score"]
-    .mean()
-    .rename(columns={"score": "avg_score"})
+    event_df.groupby("stakeholder")["text"]
+    .apply(avg_sentiment)
+    .reset_index(name="avg_score")
 )
 
 overview["category"] = overview["avg_score"].apply(
@@ -513,21 +409,29 @@ overview_chart = (
     .encode(
         x=alt.X("stakeholder:N", title="Stakeholder"),
         y=alt.Y("avg_score:Q", title="Average sentiment", scale=alt.Scale(domain=[-1, 1])),
-        color=alt.Color("category:N", scale=COLOR_SCALE, title=None),
+        color=alt.Color("category:N", scale=COLOR_SCALE),
         tooltip=["stakeholder", alt.Tooltip("avg_score:Q", format=".2f")]
     )
     .properties(height=260)
 )
+
 st.altair_chart(overview_chart, use_container_width=True)
 
-# =====================================================
-# TIMELINE (SELECTED EVENT)
-# =====================================================
 st.markdown("---")
+
+# =====================================================
+# Timeline (Selected Event Only)
+# =====================================================
 st.markdown("## Timeline: Sentiment Over Time (Selected Event)")
 
+# Compute sentiment score per row for timeline
 timeline_df = event_df.copy()
-timeline_df["score"] = timeline_df["text"].astype(str).apply(score_for_text)
+scores = []
+for t in timeline_df["text"].astype(str).tolist():
+    kw = extract_keywords(t, TOP_N_KEYWORDS)
+    scores.append(sentiment_from_keywords(kw)["score"])
+
+timeline_df["score"] = scores
 
 timeline_chart = (
     alt.Chart(timeline_df)
@@ -540,6 +444,7 @@ timeline_chart = (
     )
     .properties(height=260)
 )
+
 st.altair_chart(timeline_chart, use_container_width=True)
 
 st.markdown("---")
